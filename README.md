@@ -1,2 +1,2 @@
 # HandyChat
-An socket based chat app.
+A socket based chat app.
