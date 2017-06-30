@@ -34,5 +34,29 @@ class ChatSession(async_chat):
 
 class ChatServer(dispatcher):
     """
-    
+    handle link and form single chat class
     """
+    def __init__(self, port, name):
+        #Standard setup tasks
+        dispatcher.__init__(self)
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.set_reuse_addr()
+        self.bind(('', port))
+        self.listen(5)
+        self.name = name
+        self.session = []
+    def disconnect(self, session):
+        self.session.remove(session)
+
+    def broadcast(self, line):
+        for session in self.session:
+            session.push(line + '\r\n')
+    
+    def handle_accept(self, line):
+        conn, addr = self.accept()
+        self.session.append(ChatSession(self, conn))
+
+if __name__ == '__main__':
+    s = ChatServer(PORT, NAME)
+    try: asyncore.loop()
+    except KeyboardInterrupt: print
