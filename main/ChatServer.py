@@ -60,4 +60,79 @@ class LoginRoom(Room):
     """
     get room ready for client just linked
     """
-       
+
+    def add(self, session):
+        Room.add(self, session)
+        # greetings when clienr enter the room
+        self.broadcast('Welocome to %s\r\n' % self.server.name)
+
+    def unknown(self, session, cmd):
+        # All unknown instructions except login/logout
+        # will cause a warning:
+        session.push('Please log in\nUse "login <nick>"\r\n')
+
+    def do_login(self, session, line):
+        name = line.strip()
+        # make sure user enter their names
+        if not name:
+            session.push('Please enter a name\r\n')
+        # make sure no duplicated name
+        elif name in self.server.user:
+            session.push('The name "%s" is taken.\r\n' % name)
+            session.push('Please try again\r\n')
+        else:
+            # no problem about name 
+            # then move user to chat room
+            session.name = name
+            session.enter(self.server.main_room)
+
+class ChatRoom(room):
+    """
+    room for multi-users chat
+    """
+
+    def add(self, session):
+        # tell everyone new user is entering
+        self.broadcast(session.name + ' has enyterd the room.\r\n')
+        self.server.users[session.name] = session
+        Room.add(self, session)
+
+    def remove(self, session):
+        Room.remove(self, session)
+        # tell everyone a user has left
+        self.broadcast(session.name + ' has left tne room.\r\n')
+
+    def do_say(self, session, line):
+        self.broadcast(session.name + ': ' + line + '\r\n')
+
+    def do_look(self, session, line):
+        'handle look(), check who is in the room'
+        session.push('The following are in this room:\r\n')
+        for other in self.session:
+            session.push(other.name + '\r\n')
+    
+    def do_who(self, session, line):
+        'check who has loged in'
+        session.push('The following are logged in:\r\n')
+        for name in self.server.users:
+            session.push(name + '\r\n')
+
+class LogoutRoom(Room):
+    """
+    simple room for single user which is 
+    used to remove user from the server
+    """
+
+    def add(self, session):
+        # when user enter the LogoutRoom which
+        # is about to be deleted
+        try: del self.server.user[session.name]
+        except KeyError: pass
+
+class ChatSession(async_chat):
+    """
+    sigle chat which is in charge of single user chat
+    """
+    
+    def __init__(self, server, sock):
+        async_chat.__init__(self, sock)
