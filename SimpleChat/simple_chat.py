@@ -9,12 +9,12 @@ class ChatSession(async_chat):
     handle a class between a server and a client
     """
     def __init__(self, server, sock):
-        #standard set task:
+        # standard set task:
         async_chat.__init__(self, sock)
         self.server = server
         self.set_terminator("\r\n")
         self.data = []
-        #greetings to client
+        # greetings to client
         self.push('Welcome to %s\r\n' % self.server.name)
     
     def collect_incoming_data(self, data):
@@ -37,7 +37,7 @@ class ChatServer(dispatcher):
     handle link and form single chat class
     """
     def __init__(self, port, name):
-        #Standard setup tasks
+        # Standard setup tasks
         dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()

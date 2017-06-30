@@ -8,7 +8,7 @@ class ChatServer(dispatcher):
     def __init__(self, port):
         dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        ## try to re-use a server port if possible
+        # try to re-use a server port if possible
         self.set_reuse_addr()
         self.bind(('', port))
         self.listen(5)

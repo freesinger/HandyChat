@@ -17,18 +17,18 @@ class ConmmandHandler:
     def handle(self, session, line):
         'handle the line received from specific chat'
         if not line.strip(): return
-        #split command:
+        # split command:
         parts = line.split(' ', 1)
         cmd = parts[0]
         try: line = parts[1].strip
         except IndexError: line = ''
-        #try to look for handle proc
+        # try to look for handle proc
         meth = getattr(self, 'do_' + cmd, None)
         try:
-            #assume it can be called
+            # assume it can be called
             meth(session, line)
         except TypeError:
-            #if not, call this segement
+            # if not, call this segement
             self.unknown(session, cmd)
 
 class Room(CommandHandler):
